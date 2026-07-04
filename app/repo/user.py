@@ -13,8 +13,21 @@ class UserRepository:
     async def get_by_id(self, user_id: str) -> User | None:
         return await self.session.get(User, user_id)
 
-    async def create(self, user: User) -> User:
-        self.session.add(user)
+    async def create_or_update(
+        self, user_id: str, username: str, is_active: bool, team_id: UUID
+    ) -> User:
+        user = await self.get_by_id(user_id)
+
+        if user:
+            user.username = username
+            user.is_active = is_active
+            user.team_id = team_id
+        else:
+            user = User(
+                id=user_id, username=username, is_active=is_active, team_id=team_id
+            )
+            self.session.add(user)
+
         return user
 
     async def get_active_user_by_team(self, team_id: UUID) -> list[User]:

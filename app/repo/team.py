@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,3 +29,9 @@ class TeamRepository:
         team = result.scalar_one_or_none()
 
         return team
+
+    async def get_by_id_with_users(self, team_id: UUID) -> Team | None:
+        stmt = select(Team).where(Team.id == team_id).options(selectinload(Team.users))
+        result = await self.session.execute(stmt)
+
+        return result.scalar_one_or_none()
