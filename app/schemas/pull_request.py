@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 from app.db.models import PullRequestStatus
@@ -14,6 +16,15 @@ class PullRequestResponse(BaseModel):
     author_id: str
     status: PullRequestStatus
     assigned_reviewers: list[str]
+    
+class PullRequestMergeResponse(PullRequestResponse):
+    mergedAt: datetime
 
 class PullRequestCreateResponse(BaseModel):
     pr: PullRequestResponse
+
+class PullRequestMergedResponse(BaseModel):
+    pr: PullRequestMergeResponse
+    
+
+

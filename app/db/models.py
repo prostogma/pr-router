@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID as SQLUUID
 
@@ -57,6 +58,10 @@ class PullRequest(Base):
 
     status: Mapped[PullRequestStatus] = mapped_column(
         default=PullRequestStatus.OPEN, nullable=False
+    )
+
+    merged_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
 
     author_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)

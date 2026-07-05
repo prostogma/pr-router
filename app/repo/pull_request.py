@@ -20,6 +20,15 @@ class PullRequestRepository:
 
         return result.scalar_one_or_none()
 
+    async def get_by_id_with_reviewer(self, pr_id: str) -> PullRequest | None:
+        stmt = (
+            select(PullRequest)
+            .where(PullRequest.id == pr_id)
+            .options(selectinload(PullRequest.reviewers))
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def get_by_reviewer(self, reviewer_id: str) -> list[PullRequest]:
         stmt = (
             select(PullRequest)

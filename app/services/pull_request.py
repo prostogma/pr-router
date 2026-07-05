@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
 import random
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError, PullRequestAlreadyExistsError
-from app.db.models import PullRequest, User
+from app.db.models import PullRequest, PullRequestStatus, User
 from app.repo.pull_request import PullRequestRepository
 from app.repo.user import UserRepository
 
@@ -48,3 +49,16 @@ class PullRequestService:
                 await self.pr_repo.add_reviewer(pull_request.id, reviewer.id)
 
             return pull_request, [reviewer.id for reviewer in reviewers]
+
+    async def merge_pull_request(self, pull_request_id: str) -> PullRequest:
+        async with self.session.begin():
+            pull_request = await self.pr_repo.get_by_id_with_reviewer(pull_request_id)
+
+            if not pull_request:
+                raise NotFoundError()
+
+            if pull_request.status == PullRequestStatus.OPEN:
+                pull_request.status = PullRequestStatus.MERGED
+                pull_request.merged_at = datetime.now(timezone.utc)
+
+            return pull_request
