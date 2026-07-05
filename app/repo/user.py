@@ -2,6 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.db.models import User
 
@@ -12,6 +13,11 @@ class UserRepository:
 
     async def get_by_id(self, user_id: str) -> User | None:
         return await self.session.get(User, user_id)
+
+    async def get_by_id_with_team(self, user_id: str) -> User | None:
+        stmt = select(User).where(User.id == user_id).options(selectinload(User.team))
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def create_or_update(
         self, user_id: str, username: str, is_active: bool, team_id: UUID

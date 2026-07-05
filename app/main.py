@@ -3,12 +3,14 @@ from fastapi.responses import JSONResponse
 import logging
 
 from app.api.routers.team import router as team_router
+from app.api.routers.user import router as user_router
 from app.core.exceptions import AppError
 
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Pull request router")
 app.include_router(team_router)
+app.include_router(user_router)
 
 
 @app.exception_handler(AppError)
