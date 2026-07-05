@@ -9,10 +9,15 @@ class AppError(Exception):
     code = "INTERNAL_SERVER_ERROR"
 
     def __init__(self, message: str | None = None):
-        if message:
-            self.message = message
+        self.message = message or self.message
 
         super().__init__(self.message)
+
+
+class NotFoundError(AppError):
+    message = "resource not found"
+    status_code = 404
+    code = "NOT_FOUND"
 
 
 class TeamAlreadyExistsError(AppError):
