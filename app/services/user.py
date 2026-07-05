@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
-from app.db.models import User
+from app.db.models import PullRequest, User
 from app.repo.user import UserRepository
 from app.repo.pull_request import PullRequestRepository
 
@@ -27,3 +27,8 @@ class UserService:
             user.is_active = is_active
 
             return user
+    
+    async def get_user_reviews(self, user_id: str) -> list[PullRequest]:
+        return await self.pr_repo.get_by_reviewer(user_id)
+        
+        

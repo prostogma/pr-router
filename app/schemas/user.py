@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from app.db.models import PullRequestStatus
+
 
 class UserUpdateActivity(BaseModel):
     user_id: str
@@ -15,3 +17,15 @@ class UserUpdateActivityDetails(BaseModel):
 
 class UserUpdateActivityResponse(BaseModel):
     user: UserUpdateActivityDetails
+
+
+class PullRequestShort(BaseModel):
+    pull_request_id: str
+    pull_request_name: str
+    author_id: str
+    status: PullRequestStatus
+
+
+class UserReviewsResponse(BaseModel):
+    user_id: str
+    pull_requests: list[PullRequestStatus]

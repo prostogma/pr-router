@@ -33,8 +33,7 @@ class PullRequestRepository:
                 PullRequestReviewer,
                 PullRequestReviewer.pull_request_id == PullRequest.id,
             )
-            .where(PullRequestReviewer.id == reviewer_id)
-            .options(selectinload(PullRequest.author))
+            .where(PullRequestReviewer.reviewer_id == reviewer_id)
         )
 
         result = await self.session.execute(stmt)
