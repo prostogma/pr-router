@@ -28,7 +28,27 @@ class TeamAlreadyExistsError(AppError):
         super().__init__(f"{name} already exists")
 
 
-class PullRequestAlreadyExistsError(AppError):
-    message = "PR id already exists"
+class PullRequestConflictError(AppError):
     status_code = 409
+    code = "CONFLICT_ERROR"
+    message = "Conflict with the current state of the resource"
+
+
+class PullRequestAlreadyExistsError(PullRequestConflictError):
+    message = "PR id already exists"
     code = "PR_EXISTS"
+
+
+class PullRequestMergedError(PullRequestConflictError):
+    message = "cannot reassign on merged PR"
+    code = "PR_MERGED"
+
+
+class ReviewerNotAssignedError(PullRequestConflictError):
+    message = "reviewer is not assigned to this PR"
+    code = "NOT_ASSIGNED"
+
+
+class NoReviewerCandidatesError(PullRequestConflictError):
+    message = "no active replacement candidate in team"
+    code = "NO_CANDIDATE"

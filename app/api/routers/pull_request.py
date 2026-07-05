@@ -1,10 +1,12 @@
 from fastapi import APIRouter, status
 
 from app.schemas.pull_request import (
+    PullRequestReassignReviewer,
     PullRequestCreate,
     PullRequestCreateResponse,
     PullRequestMergeResponse,
     PullRequestMergedResponse,
+    PullRequestReassignReviewerResponse,
     PullRequestResponse,
 )
 from app.api.depends import pull_request_service_dp
@@ -51,7 +53,35 @@ async def merge_pull_request(
             pull_request_name=pull_request.title,
             author_id=pull_request.author_id,
             status=pull_request.status,
-            assigned_reviewers=[reviewer.reviewer_id for reviewer in pull_request.reviewers],
+            assigned_reviewers=[
+                reviewer.reviewer_id for reviewer in pull_request.reviewers
+            ],
             mergedAt=pull_request.merged_at,
         )
+    )
+
+
+@router.post(
+    "/reassign",
+    status_code=status.HTTP_200_OK,
+    response_model=PullRequestReassignReviewerResponse,
+)
+async def reassign_reviewer(
+    payload: PullRequestReassignReviewer, pull_request_service: pull_request_service_dp
+) -> PullRequestReassignReviewerResponse:
+    pull_request, new_reviewer_id = await pull_request_service.reassign_reviewer(
+        **payload.model_dump()
+    )
+
+    return PullRequestReassignReviewerResponse(
+        pr=PullRequestResponse(
+            pull_request_id=pull_request.id,
+            pull_request_name=pull_request.title,
+            author_id=pull_request.author_id,
+            status=pull_request.status,
+            assigned_reviewers=[
+                reviewer.reviewer_id for reviewer in pull_request.reviewers
+            ],
+        ),
+        replaced_by=new_reviewer_id,
     )

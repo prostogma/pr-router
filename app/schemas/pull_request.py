@@ -16,7 +16,7 @@ class PullRequestResponse(BaseModel):
     author_id: str
     status: PullRequestStatus
     assigned_reviewers: list[str]
-    
+
 class PullRequestMergeResponse(PullRequestResponse):
     mergedAt: datetime
 
@@ -25,6 +25,11 @@ class PullRequestCreateResponse(BaseModel):
 
 class PullRequestMergedResponse(BaseModel):
     pr: PullRequestMergeResponse
-    
 
+class PullRequestReassignReviewer(BaseModel):
+    pull_request_id: str
+    old_reviewer_id: str
 
+class PullRequestReassignReviewerResponse(BaseModel):
+    pr: PullRequestResponse
+    replaced_by: str

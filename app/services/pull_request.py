@@ -2,7 +2,13 @@ from datetime import datetime, timezone
 import random
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import NotFoundError, PullRequestAlreadyExistsError
+from app.core.exceptions import (
+    NoReviewerCandidatesError,
+    NotFoundError,
+    PullRequestAlreadyExistsError,
+    PullRequestMergedError,
+    ReviewerNotAssignedError,
+)
 from app.db.models import PullRequest, PullRequestStatus, User
 from app.repo.pull_request import PullRequestRepository
 from app.repo.user import UserRepository
@@ -62,3 +68,54 @@ class PullRequestService:
                 pull_request.merged_at = datetime.now(timezone.utc)
 
             return pull_request
+
+    async def reassign_reviewer(
+        self, pull_request_id: str, old_reviewer_id: str
+    ) -> tuple[PullRequest, str]:
+        async with self.session.begin():
+            pull_request = await self.pr_repo.get_by_id_with_reviewer(pull_request_id)
+
+            if not pull_request:
+                raise NotFoundError()
+
+            if pull_request.status == PullRequestStatus.MERGED:
+                raise PullRequestMergedError()
+
+            old_reviewer = await self.user_repo.get_by_id(old_reviewer_id)
+
+            if not old_reviewer:
+                raise NotFoundError()
+
+            pull_request_reviewers_ids = {
+                reviewer.reviewer_id for reviewer in pull_request.reviewers
+            }
+
+            if old_reviewer.id not in pull_request_reviewers_ids:
+                raise ReviewerNotAssignedError()
+
+            candidates = await self.user_repo.get_active_users_by_team(
+                old_reviewer.team_id
+            )
+
+            candidates = [
+                user
+                for user in candidates
+                if user.id != old_reviewer.id
+                and user.id != pull_request.author_id
+                and user.id not in pull_request_reviewers_ids
+            ]
+
+            if not candidates:
+                raise NoReviewerCandidatesError()
+
+            new_reviewer = random.choice(candidates)
+
+            reviewer_link = next(
+                reviewer
+                for reviewer in pull_request.reviewers
+                if reviewer.reviewer_id == old_reviewer.id
+            )
+
+            reviewer_link.reviewer_id = new_reviewer.id
+
+            return pull_request, new_reviewer.id
