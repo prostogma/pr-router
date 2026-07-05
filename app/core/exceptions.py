@@ -26,3 +26,9 @@ class TeamAlreadyExistsError(AppError):
 
     def __init__(self, name: str):
         super().__init__(f"{name} already exists")
+
+
+class PullRequestAlreadyExistsError(AppError):
+    message = "PR id already exists"
+    status_code = 409
+    code = "PR_EXISTS"

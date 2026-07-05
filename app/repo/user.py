@@ -36,7 +36,7 @@ class UserRepository:
 
         return user
 
-    async def get_active_user_by_team(self, team_id: UUID) -> list[User]:
+    async def get_active_users_by_team(self, team_id: UUID) -> list[User]:
         stmt = select(User).where(User.team_id == team_id, User.is_active.is_(True))
         result = await self.session.execute(stmt)
         return result.scalars().all()

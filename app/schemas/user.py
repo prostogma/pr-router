@@ -28,4 +28,4 @@ class PullRequestShort(BaseModel):
 
 class UserReviewsResponse(BaseModel):
     user_id: str
-    pull_requests: list[PullRequestStatus]
+    pull_requests: list[PullRequestShort]

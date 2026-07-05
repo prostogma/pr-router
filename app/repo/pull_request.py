@@ -14,13 +14,7 @@ class PullRequestRepository:
         return pull_request
 
     async def get_by_id(self, pr_id: str) -> PullRequest | None:
-        stmt = (
-            select(PullRequest)
-            .where(PullRequest.id == pr_id)
-            .options(
-                selectinload(PullRequest.author), selectinload(PullRequest.reviewers)
-            )
-        )
+        stmt = select(PullRequest).where(PullRequest.id == pr_id)
 
         result = await self.session.execute(stmt)
 
@@ -38,3 +32,10 @@ class PullRequestRepository:
 
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def add_reviewer(self, pull_request_id: str, reviewer_id: str):
+        self.session.add(
+            PullRequestReviewer(
+                pull_request_id=pull_request_id, reviewer_id=reviewer_id
+            )
+        )
