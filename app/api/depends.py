@@ -4,13 +4,16 @@ from fastapi import Depends
 
 from app.db.session import session_db
 from app.repo.pull_request import PullRequestRepository
+from app.repo.stats import StatsRepository
 from app.repo.team import TeamRepository
 from app.repo.user import UserRepository
 from app.services.pull_request import PullRequestService
+from app.services.stats import StatsService
 from app.services.team import TeamService
 from app.services.user import UserService
 
 
+# Зависимости репозиториев
 async def get_team_repo(session: session_db) -> TeamRepository:
     return TeamRepository(session)
 
@@ -23,6 +26,11 @@ async def get_pull_request_repo(session: session_db) -> PullRequestRepository:
     return PullRequestRepository(session)
 
 
+async def get_stats_repo(session: session_db) -> StatsRepository:
+    return StatsRepository(session)
+
+
+# Зависимости сервисов
 async def get_team_service(
     session: session_db,
     team_repo: Annotated[TeamRepository, Depends(get_team_repo)],
@@ -47,6 +55,13 @@ async def get_pull_request_service(
     return PullRequestService(session, pr_repo, user_repo)
 
 
+async def get_stats_service(
+    stats_repo: Annotated[StatsRepository, Depends(get_stats_repo)],
+) -> StatsService:
+    return StatsService(stats_repo)
+
+
+# Аннотированные depends для ручек
 team_service_dp = Annotated[TeamService, Depends(get_team_service)]
 
 user_service_dp = Annotated[UserService, Depends(get_user_service)]
@@ -54,3 +69,5 @@ user_service_dp = Annotated[UserService, Depends(get_user_service)]
 pull_request_service_dp = Annotated[
     PullRequestService, Depends(get_pull_request_service)
 ]
+
+stats_service_dp = Annotated[StatsService, Depends(get_stats_service)]
