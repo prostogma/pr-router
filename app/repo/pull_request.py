@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.db.models import PullRequest, PullRequestReviewer
+from app.db.models import PullRequest, PullRequestReviewer, PullRequestStatus
 
 
 class PullRequestRepository:
@@ -40,6 +40,24 @@ class PullRequestRepository:
         )
 
         result = await self.session.execute(stmt)
+        return result.scalars().all()
+
+    async def get_open_by_reviewer(self, reviewer_id: str) -> list[PullRequest]:
+        stmt = (
+            select(PullRequest)
+            .join(
+                PullRequestReviewer,
+                PullRequestReviewer.pull_request_id == PullRequest.id,
+            )
+            .where(
+                PullRequestReviewer.reviewer_id == reviewer_id,
+                PullRequest.status == PullRequestStatus.OPEN,
+            )
+            .options(selectinload(PullRequest.reviewers))
+        )
+        
+        result = await self.session.execute(stmt)
+        
         return result.scalars().all()
 
     async def add_reviewer(self, pull_request_id: str, reviewer_id: str):

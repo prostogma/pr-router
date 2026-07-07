@@ -29,3 +29,12 @@ class PullRequestShort(BaseModel):
 class UserReviewsResponse(BaseModel):
     user_id: str
     pull_requests: list[PullRequestShort]
+
+
+# Схема для безопасного деактивирования пользователей команды
+class UsersDeactivateRequest(BaseModel):
+    user_ids: list[str]
+
+
+class UsersDeactivateResponse(BaseModel):
+    users: list[UserUpdateActivityDetails]

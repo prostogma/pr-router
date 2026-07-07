@@ -28,6 +28,12 @@ class TeamAlreadyExistsError(AppError):
         super().__init__(f"{name} already exists")
 
 
+class UsersFromDifferentTeamsError(AppError):
+    status_code = 400
+    code = "DIFFERENT_TEAMS"
+    message = "All users selected for deactivation must belong the same team"
+
+
 class PullRequestConflictError(AppError):
     status_code = 409
     code = "CONFLICT_ERROR"

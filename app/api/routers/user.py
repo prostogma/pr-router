@@ -7,6 +7,8 @@ from app.schemas.user import (
     UserUpdateActivity,
     UserUpdateActivityDetails,
     UserUpdateActivityResponse,
+    UsersDeactivateRequest,
+    UsersDeactivateResponse,
 )
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -31,6 +33,28 @@ async def update_user_activity(
             team_name=user.team.name,
             is_active=user.is_active,
         )
+    )
+
+
+@router.post(
+    "/deactivate",
+    status_code=status.HTTP_200_OK,
+)
+async def deactivate_users(
+    payload: UsersDeactivateRequest, user_service: user_service_dp
+) -> UsersDeactivateResponse:
+    users = await user_service.deactivate_users(**payload.model_dump())
+
+    return UsersDeactivateResponse(
+        users=[
+            UserUpdateActivityDetails(
+                user_id=user.id,
+                username=user.username,
+                team_name=user.team.name,
+                is_active=user.is_active,
+            )
+            for user in users
+        ]
     )
 
 

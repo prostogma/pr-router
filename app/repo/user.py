@@ -19,6 +19,14 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_ids_with_team(self, user_ids: str) -> list[User]:
+        stmt = (
+            select(User).where(User.id.in_(user_ids)).options(selectinload(User.team))
+        )
+        result = await self.session.execute(stmt)
+
+        return result.scalars().all()
+
     async def create_or_update(
         self, user_id: str, username: str, is_active: bool, team_id: UUID
     ) -> User:
