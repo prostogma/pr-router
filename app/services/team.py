@@ -23,7 +23,7 @@ class TeamService:
         self.team_repo = team_repo
         self.user_repo = user_repo
 
-    async def create_team_with_members(self, team_data: TeamCreate) -> TeamCreateResponse:
+    async def create_team_with_members(self, team_data: TeamCreate) -> Team:
         async with self.session.begin():
             team = await self.team_repo.create(Team(name=team_data.team_name))
 
@@ -37,34 +37,12 @@ class TeamService:
 
             team = await self.team_repo.get_by_id_with_users(team.id)
 
-            return TeamCreateResponse(
-                team=TeamDetailsResponse(
-                    team_name=team.name,
-                    members=[
-                        TeamMemberResponse(
-                            user_id=user.id,
-                            username=user.username,
-                            is_active=user.is_active,
-                        )
-                        for user in team.users
-                    ],
-                )
-            )
+            return team
 
-    async def get_team_with_members_by_name(self, team_name: str) -> TeamDetailsResponse:
+    async def get_team_with_members_by_name(self, team_name: str) -> Team:
         team = await self.team_repo.get_team_by_name(team_name)
 
         if not team:
             raise NotFoundError()
 
-        return TeamDetailsResponse(
-            team_name=team.name,
-            members=[
-                TeamMemberResponse(
-                    user_id=user.id,
-                    username=user.username,
-                    is_active=user.is_active,
-                )
-                for user in team.users
-            ],
-        )
+        return team

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, status
+from typing import Annotated
+
+from fastapi import APIRouter, Body, status
 
 from app.schemas.pull_request import (
     PullRequestReassignReviewer,
@@ -43,7 +45,7 @@ async def create_pull_request_with_reviewers(
     "/merge", status_code=status.HTTP_200_OK, response_model=PullRequestMergedResponse
 )
 async def merge_pull_request(
-    pull_request_id: str, pull_request_service: pull_request_service_dp
+    pull_request_id: Annotated[str, Body(embed=True)], pull_request_service: pull_request_service_dp
 ) -> PullRequestMergedResponse:
     pull_request = await pull_request_service.merge_pull_request(pull_request_id)
 
