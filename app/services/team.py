@@ -35,9 +35,12 @@ class TeamService:
                     team_id=team.id,
                 )
 
-            team = await self.team_repo.get_by_id_with_users(team.id)
+            team_with_users = await self.team_repo.get_by_id_with_users(team.id)
 
-            return team
+            if team_with_users is None:
+                raise RuntimeError("Created team was not found")
+
+            return team_with_users
 
     async def get_team_with_members_by_name(self, team_name: str) -> Team:
         team = await self.team_repo.get_team_by_name(team_name)

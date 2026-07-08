@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -29,7 +31,7 @@ class PullRequestRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_by_reviewer(self, reviewer_id: str) -> list[PullRequest]:
+    async def get_by_reviewer(self, reviewer_id: str) -> Sequence[PullRequest]:
         stmt = (
             select(PullRequest)
             .join(
@@ -42,7 +44,7 @@ class PullRequestRepository:
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    async def get_open_by_reviewer(self, reviewer_id: str) -> list[PullRequest]:
+    async def get_open_by_reviewer(self, reviewer_id: str) -> Sequence[PullRequest]:
         stmt = (
             select(PullRequest)
             .join(
@@ -55,9 +57,9 @@ class PullRequestRepository:
             )
             .options(selectinload(PullRequest.reviewers))
         )
-        
+
         result = await self.session.execute(stmt)
-        
+
         return result.scalars().all()
 
     async def add_reviewer(self, pull_request_id: str, reviewer_id: str):

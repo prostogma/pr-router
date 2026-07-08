@@ -1,3 +1,4 @@
+from typing import Sequence
 from uuid import UUID
 
 from sqlalchemy import select
@@ -19,7 +20,7 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_by_ids_with_team(self, user_ids: str) -> list[User]:
+    async def get_by_ids_with_team(self, user_ids: list[str]) -> Sequence[User]:
         stmt = (
             select(User).where(User.id.in_(user_ids)).options(selectinload(User.team))
         )
@@ -44,7 +45,7 @@ class UserRepository:
 
         return user
 
-    async def get_active_users_by_team(self, team_id: UUID) -> list[User]:
+    async def get_active_users_by_team(self, team_id: UUID) -> Sequence[User]:
         stmt = select(User).where(User.team_id == team_id, User.is_active.is_(True))
         result = await self.session.execute(stmt)
         return result.scalars().all()

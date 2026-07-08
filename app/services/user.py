@@ -1,4 +1,5 @@
 import random
+from typing import Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +31,7 @@ class UserService:
 
             return user
 
-    async def deactivate_users(self, user_ids: list[str]) -> list[User]:
+    async def deactivate_users(self, user_ids: list[str]) -> Sequence[User]:
         async with self.session.begin():
             users = await self.user_repo.get_by_ids_with_team(user_ids)
 
@@ -82,5 +83,5 @@ class UserService:
 
             return users
 
-    async def get_user_reviews(self, user_id: str) -> list[PullRequest]:
+    async def get_user_reviews(self, user_id: str) -> Sequence[PullRequest]:
         return await self.pr_repo.get_by_reviewer(user_id)
