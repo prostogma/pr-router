@@ -20,12 +20,12 @@ async def engine():
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    
+
     await engine.dispose()
 
 
@@ -37,11 +37,13 @@ async def async_session_maker(engine):
 @pytest.fixture
 async def db_session(async_session_maker):
     async with async_session_maker() as session:
-        
+
         yield session
-        
+
         await session.execute(
-            text("TRUNCATE TABLE teams, users, pull_requests, pull_request_reviewers RESTART IDENTITY CASCADE;")
+            text(
+                "TRUNCATE TABLE teams, users, pull_requests, pull_request_reviewers RESTART IDENTITY CASCADE;"
+            )
         )
         await session.commit()
 
@@ -59,3 +61,19 @@ async def async_client(db_session):
         yield async_client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def backend_team(async_client):
+    await async_client.post(
+        "/team/add",
+        json={
+            "team_name": "backend",
+            "members": [
+                {"user_id": "u1", "username": "Alice", "is_active": True},
+                {"user_id": "u2", "username": "Bob", "is_active": True},
+                {"user_id": "u3", "username": "John", "is_active": True},
+                {"user_id": "u4", "username": "Mike", "is_active": True},
+            ],
+        },
+    )

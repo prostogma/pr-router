@@ -1,18 +1,18 @@
 import pytest
 
 
-async def test_create_pull_request(async_client):
-    await async_client.post(
-        "/team/add",
-        json={
-            "team_name": "backend",
-            "members": [
-                {"user_id": "u1", "username": "Alice", "is_active": True},
-                {"user_id": "u2", "username": "Bob", "is_active": True},
-                {"user_id": "u3", "username": "John", "is_active": True},
-            ],
-        },
-    )
+async def test_create_pull_request(async_client, backend_team):
+    # await async_client.post(
+    #     "/team/add",
+    #     json={
+    #         "team_name": "backend",
+    #         "members": [
+    #             {"user_id": "u1", "username": "Alice", "is_active": True},
+    #             {"user_id": "u2", "username": "Bob", "is_active": True},
+    #             {"user_id": "u3", "username": "John", "is_active": True},
+    #         ],
+    #     },
+    # )
 
     response = await async_client.post(
         "/pullRequest/create",
@@ -37,17 +37,7 @@ async def test_create_pull_request(async_client):
     assert "u1" not in reviewers
 
 
-async def test_merge(async_client):
-    await async_client.post(
-        "/team/add",
-        json={
-            "team_name": "backend",
-            "members": [
-                {"user_id": "u1", "username": "Alice", "is_active": True},
-                {"user_id": "u2", "username": "Bob", "is_active": True},
-            ],
-        },
-    )
+async def test_merge(async_client, backend_team):
 
     await async_client.post(
         "/pullRequest/create",
@@ -78,35 +68,7 @@ async def test_merge(async_client):
     assert response.status_code == 200
 
 
-async def test_reassign(async_client):
-    await async_client.post(
-        "/team/add",
-        json={
-            "team_name": "backend",
-            "members": [
-                {
-                    "user_id": "u1",
-                    "username": "Alice",
-                    "is_active": True,
-                },
-                {
-                    "user_id": "u2",
-                    "username": "Bob",
-                    "is_active": True,
-                },
-                {
-                    "user_id": "u3",
-                    "username": "John",
-                    "is_active": True,
-                },
-                {
-                    "user_id": "u4",
-                    "username": "Mike",
-                    "is_active": True,
-                },
-            ],
-        },
-    )
+async def test_reassign(async_client, backend_team):
 
     response = await async_client.post(
         "/pullRequest/create",
