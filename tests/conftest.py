@@ -1,11 +1,12 @@
 import pytest
 
-from sqlalchemy import NullPool, event
+from sqlalchemy import NullPool, delete, event, text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from httpx import ASGITransport, AsyncClient
 
 from app.db.base import Base
+from app.db.models import PullRequest, PullRequestReviewer, Team, User
 from app.db.session import create_async_session
 from app.main import app
 
@@ -18,12 +19,12 @@ async def engine():
     )
 
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all())
+        await conn.run_sync(Base.metadata.create_all)
     
     yield engine
     
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all())
+        await conn.run_sync(Base.metadata.drop_all)
     
     await engine.dispose()
 
@@ -34,24 +35,15 @@ async def async_session_maker(engine):
 
 
 @pytest.fixture
-async def db_session(engine, async_session_maker):
-    async with engine.connect() as conn:
-        trans = await conn.begin()
-
-        async with async_session_maker(bind=conn) as session:
-            await session.begin_nested() # savepoint (вложенная транзакция), чтобы при commit основная осталась жива
-
-            # если в коде ошибка и вызовется rollback, пересоздаем savepoint
-            @event.listens_for(session.sync_session, "after_transaction_end")
-            def end_savepoint(session, trans):
-                if not session._nested_transaction:
-                    if session.is_active:
-                        session.begin_nested()
-
-            yield session
-
-            if trans.is_active:
-                await trans.rollback()
+async def db_session(async_session_maker):
+    async with async_session_maker() as session:
+        
+        yield session
+        
+        await session.execute(
+            text("TRUNCATE TABLE teams, users, pull_requests, pull_request_reviewers RESTART IDENTITY CASCADE;")
+        )
+        await session.commit()
 
 
 @pytest.fixture
