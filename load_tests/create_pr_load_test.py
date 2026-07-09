@@ -43,6 +43,18 @@ async def main():
 
         started = time.perf_counter()
 
+        await client.post(
+            "http://localhost:8080/team/add",
+            json={
+                "team_name": "backend",
+                "members": [
+                    {"user_id": "u1", "username": "Alice", "is_active": True},
+                    {"user_id": "u2", "username": "Bob", "is_active": True},
+                    {"user_id": "u3", "username": "John", "is_active": True},
+                ],
+            },
+        )
+
         await asyncio.gather(*tasks)
 
         finished = time.perf_counter()
