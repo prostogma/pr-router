@@ -54,6 +54,10 @@ http://localhost:8080/docs
 ## Запуск тестов
 
 ```bash
+docker compose -f docker-compose.test.yml up -d
+```
+
+```bash
 pytest
 ```
 

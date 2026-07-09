@@ -1,5 +1,7 @@
+name: pr-router-test
+
 services:
-  postgres:
+  test_postgres:
     image: postgres:17-alpine
     container_name: test-pr-router-postgres
     environment:
