@@ -58,6 +58,10 @@ docker compose -f docker-compose.test.yml up -d
 ```
 
 ```bash
+uv sync
+```
+
+```bash
 pytest
 ```
 
@@ -67,7 +71,7 @@ pytest
 Запуск:
 
 ```bash
-python py -m load_tests.create_pr_load_test
+py -m load_tests.create_pr_load_test
 ```
 
 ## Структура проекта
