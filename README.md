@@ -27,6 +27,10 @@
 
 ## Запуск
 
+1. Создайте файл `.env` на основе `.env.example`
+
+2. Запустите проект:
+
 ```bash
 docker compose up --build
 ```
